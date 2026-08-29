@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useCart } from "./CartProvider";
+import { OrderSubmit } from "./OrderButton";
 import { formatTRY } from "@/lib/format";
 
 export function CheckoutForm() {
@@ -27,11 +28,6 @@ export function CheckoutForm() {
     const surname = parts.slice(1).join(" ") || name;
     const phone = String(form.get("phone") || "").replace(/\s/g, "");
     setLoading(true);
-    try {
-      navigator.vibrate?.(24);
-    } catch {
-      /* ignore */
-    }
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -158,13 +154,9 @@ export function CheckoutForm() {
 
       {error ? <p className="text-sm text-[#ff8a75]">{error}</p> : null}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-full bg-[#e8a317] py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#140e0a] shadow-[0_12px_32px_rgba(232,163,23,0.4)] transition duration-150 hover:bg-[#f3ba3a] active:scale-[0.96] disabled:opacity-60"
-      >
-        {loading ? "Hazırlanıyor..." : `Öde · ${formatTRY(total)}`}
-      </button>
+      <OrderSubmit disabled={loading}>
+        {loading ? "Hazırlanıyor..." : `Sipariş ver · ${formatTRY(total)}`}
+      </OrderSubmit>
     </form>
   );
 }

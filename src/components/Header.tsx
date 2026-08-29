@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BrandMark } from "./BrandMark";
+import { OrderLink } from "./OrderButton";
 import { useCart } from "./CartProvider";
 
 const LINKS = [
@@ -47,17 +48,16 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/siparis"
-            className={`relative rounded-full border border-[#e8a317]/40 px-4 py-2 text-sm font-medium text-[#e8a317] transition hover:bg-[#e8a317] hover:text-[#140e0a] ${bump ? "cart-bump" : ""}`}
-          >
-            Sepetim
+          <span className={`relative ${bump ? "cart-bump" : ""}`}>
+            <OrderLink href="/siparis" className="px-4 py-2.5 text-[11px] sm:px-5 sm:text-xs">
+              Sipariş ver
+            </OrderLink>
             {count > 0 ? (
-              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#c23c22] px-1 text-[11px] text-white">
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#c23c22] px-1 text-[11px] text-white ring-2 ring-[#140e0a]">
                 {count}
               </span>
             ) : null}
-          </Link>
+          </span>
           <button
             type="button"
             className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-[#f6ead7] sm:hidden"
