@@ -1,0 +1,165 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+import { useCart } from "./CartProvider";
+import { formatTRY } from "@/lib/format";
+
+export function CheckoutForm() {
+  const router = useRouter();
+  const { items, setQuantity, remove, total, count } = useCart();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    if (count === 0) {
+      setError("Sepetiniz boş.");
+      return;
+    }
+    const form = new FormData(event.currentTarget);
+    const fullName = String(form.get("fullName") || "").trim();
+    const parts = fullName.split(/\s+/);
+    const name = parts[0] || "";
+    const surname = parts.slice(1).join(" ") || name;
+    const phone = String(form.get("phone") || "").replace(/\s/g, "");
+    setLoading(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name,
+            surname,
+            email: `${phone.replace(/\D/g, "") || "siparis"}@fullbite.local`,
+            phone,
+            address: form.get("address"),
+          },
+          items: items.map((line) => ({
+            id: line.id,
+            name: line.product.name,
+            price: line.product.price,
+            quantity: line.quantity,
+          })),
+        }),
+      });
+      const data = (await response.json()) as {
+        orderId?: string;
+        error?: string;
+      };
+      if (!response.ok || !data.orderId) {
+        throw new Error(data.error || "Ödeme başlatılamadı.");
+      }
+      router.push(`/odeme/${data.orderId}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Bir hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (count === 0) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-[#1c1410] p-8 text-center">
+        <p className="text-[#f6ead7]/70">Sepetin boş.</p>
+        <Link
+          href="/"
+          className="mt-5 inline-block rounded-full bg-[#e8a317] px-6 py-3 text-sm font-semibold text-[#140e0a]"
+        >
+          Hamburgerlere dön
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-8">
+      <ul className="space-y-3">
+        {items.map((line) => (
+          <li
+            key={line.id}
+            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1c1410] p-3"
+          >
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+              <Image
+                src={line.product.image}
+                alt={line.product.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-[family-name:var(--font-display)] text-lg">
+                {line.product.name}
+              </p>
+              <p className="text-sm text-[#e8a317]">
+                {formatTRY(line.product.price)}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setQuantity(line.id, line.quantity - 1)}
+                className="h-8 w-8 rounded-full border border-white/20"
+              >
+                −
+              </button>
+              <span className="w-4 text-center">{line.quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity(line.id, line.quantity + 1)}
+                className="h-8 w-8 rounded-full border border-white/20"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => remove(line.id)}
+              className="text-xs text-[#f6ead7]/40"
+            >
+              Sil
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="space-y-4 rounded-2xl border border-white/10 bg-[#1c1410] p-5">
+        <h2 className="font-[family-name:var(--font-display)] text-2xl">Teslimat</h2>
+        <input
+          name="fullName"
+          required
+          placeholder="Ad soyad"
+          className="w-full rounded-xl border border-white/10 bg-[#140e0a] px-4 py-3 text-[#f6ead7] outline-none focus:border-[#e8a317]"
+        />
+        <input
+          name="phone"
+          required
+          placeholder="Telefon"
+          className="w-full rounded-xl border border-white/10 bg-[#140e0a] px-4 py-3 text-[#f6ead7] outline-none focus:border-[#e8a317]"
+        />
+        <textarea
+          name="address"
+          required
+          rows={2}
+          placeholder="Adres"
+          className="w-full rounded-xl border border-white/10 bg-[#140e0a] px-4 py-3 text-[#f6ead7] outline-none focus:border-[#e8a317]"
+        />
+      </div>
+
+      {error ? <p className="text-sm text-[#ff8a75]">{error}</p> : null}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-full bg-[#e8a317] py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#140e0a] disabled:opacity-60"
+      >
+        {loading ? "Hazırlanıyor..." : `Öde · ${formatTRY(total)}`}
+      </button>
+    </form>
+  );
+}
