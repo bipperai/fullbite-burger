@@ -1,5 +1,5 @@
 import { ProductCard } from "@/components/ProductCard";
-import { MENU } from "@/lib/menu";
+import { MENU, MENU_SECTIONS } from "@/lib/menu";
 
 export default function HomePage() {
   return (
@@ -8,13 +8,24 @@ export default function HomePage() {
         Menü
       </h1>
       <p className="mt-2 text-[#f6ead7]/70">
-        Hamburger, patates, içecek ve toplu menüler — hepsi bir arada.
+        Üçlü menü: hamburger, patates, içecek.
       </p>
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {MENU.map((item) => (
-          <ProductCard key={item.id} item={item} />
-        ))}
-      </div>
+
+      {MENU_SECTIONS.map((section) => {
+        const items = MENU.filter((item) => item.category === section.id);
+        return (
+          <section key={section.id} className="mt-12">
+            <h2 className="font-[family-name:var(--font-display)] text-3xl italic text-[#e8a317]">
+              {section.title}
+            </h2>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
+                <ProductCard key={item.id} item={item} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

@@ -8,8 +8,8 @@ export function Footer() {
         <div>
           <BrandMark size="lg" />
           <p className="mt-4 max-w-sm text-sm leading-6">
-            Kalın brioche, ince smash, bol sos. İstanbul’da ev yapımı burger
-            kültürü.
+            Erzurum yaylasından Ankara’ya. 1986’dan beri kendi etimiz, 2026’dan
+            beri FullBite.
           </p>
         </div>
         <div>
@@ -18,8 +18,8 @@ export function Footer() {
           </p>
           <p className="mt-3 text-sm">Hafta içi 12:00 – 23:30</p>
           <p className="text-sm">Hafta sonu 12:00 – 00:30</p>
-          <p className="mt-4 text-sm">Cihangir, Beyoğlu / İstanbul</p>
-          <p className="text-sm">0212 000 00 00</p>
+          <p className="mt-4 text-sm">Bahçelievler / Ankara</p>
+          <p className="text-sm">0312 000 00 00</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-[#e8a317]">

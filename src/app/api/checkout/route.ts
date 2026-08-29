@@ -61,7 +61,7 @@ export async function POST(request: Request) {
           `${phone.replace(/\D/g, "") || "siparis"}@fullbite.local`,
         phone: gsmNumber,
         identityNumber: body.customer.identityNumber || "74300864791",
-        city: body.customer.city || "İstanbul",
+        city: body.customer.city || "Ankara",
         district: body.customer.district || "—",
         address: body.customer.address,
         note: body.customer.note,

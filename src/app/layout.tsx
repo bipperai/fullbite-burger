@@ -21,7 +21,7 @@ const body = Outfit({
 export const metadata: Metadata = {
   title: "FullBite Burger | Smash burger, teslimat ve iyzico ödeme",
   description:
-    "FullBite Burger — imza smash burgerler, yan ürünler ve iyzico güvenceli online sipariş.",
+    "FullBite Burger — Erzurum’da 1986’dan beri besicilik, 2026’da Ankara Bahçelievler’de ilk şube.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
