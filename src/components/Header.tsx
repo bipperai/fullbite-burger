@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandMark } from "./BrandMark";
 import { useCart } from "./CartProvider";
 
@@ -14,8 +14,16 @@ const LINKS = [
 
 export function Header() {
   const pathname = usePathname();
-  const { count } = useCart();
+  const { count, pulse } = useCart();
   const [open, setOpen] = useState(false);
+  const [bump, setBump] = useState(false);
+
+  useEffect(() => {
+    if (!pulse) return;
+    setBump(true);
+    const t = window.setTimeout(() => setBump(false), 520);
+    return () => window.clearTimeout(t);
+  }, [pulse]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#140e0a]/90 backdrop-blur-xl">
@@ -41,7 +49,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <Link
             href="/siparis"
-            className="relative rounded-full border border-[#e8a317]/40 px-4 py-2 text-sm font-medium text-[#e8a317] hover:bg-[#e8a317] hover:text-[#140e0a]"
+            className={`relative rounded-full border border-[#e8a317]/40 px-4 py-2 text-sm font-medium text-[#e8a317] transition hover:bg-[#e8a317] hover:text-[#140e0a] ${bump ? "cart-bump" : ""}`}
           >
             Sepetim
             {count > 0 ? (

@@ -8,7 +8,8 @@ export default function HomePage() {
         Menü
       </h1>
       <p className="mt-2 text-[#f6ead7]/70">
-        Üçlü menü: hamburger, patates, içecek.
+        Üçlü menü: hamburger, patates, kola. İçindekiler: 130 gr et, cheddar,
+        domates, karamelize soğan, marul, özel sos, dana füme.
       </p>
 
       {MENU_SECTIONS.map((section) => {

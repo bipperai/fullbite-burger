@@ -29,3 +29,38 @@ body {
   background: #e8a317;
   color: #140e0a;
 }
+
+@keyframes bite-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.22);
+  }
+  70% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bite-flash {
+  0% {
+    transform: scale(0.93);
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cart-bump {
+  animation: bite-pop 0.48s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+}
+
+.animate-bite-flash {
+  animation: bite-flash 0.35s ease-out;
+}
