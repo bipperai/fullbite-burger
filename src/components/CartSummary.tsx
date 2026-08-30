@@ -1,6 +1,6 @@
 "use client";
 
-import { OrderLink } from "./OrderButton";
+import Link from "next/link";
 import { useCart } from "./CartProvider";
 import { formatTRY } from "@/lib/format";
 
@@ -13,15 +13,16 @@ export function CartSummary() {
       <p className="mt-1 font-[family-name:var(--font-display)] text-3xl text-[#e8a317]">
         {formatTRY(total)}
       </p>
-      {count === 0 ? (
-        <p className="mt-6 rounded-full bg-white/10 py-3 text-center text-sm text-white/30">
-          Sepet boş
-        </p>
-      ) : (
-        <OrderLink href="/siparis" className="mt-6 py-3 text-sm">
-          Sipariş ver
-        </OrderLink>
-      )}
+      <Link
+        href="/siparis"
+        className={`mt-6 block rounded-full py-3.5 text-center text-sm font-semibold uppercase tracking-[0.14em] transition duration-150 active:scale-[0.94] ${
+          count === 0
+            ? "pointer-events-none bg-white/10 text-white/30"
+            : "bg-[#e8a317] text-[#140e0a] shadow-[0_10px_28px_rgba(232,163,23,0.38)] hover:bg-[#f3ba3a]"
+        }`}
+      >
+        Siparişe geç
+      </Link>
     </aside>
   );
 }

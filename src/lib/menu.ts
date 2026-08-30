@@ -15,46 +15,49 @@ export const MENU: MenuItem[] = [
     id: "dadas-menu",
     name: "Dadaş Üçlü",
     description:
-      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme · patates · kola.",
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme. Patates + içecek.",
     price: 539,
     category: "combo",
-    image: "/food/box.jpg",
+    image: "/food/combo.jpg",
     tags: ["3'lü"],
   },
   {
     id: "smash-menu",
     name: "Smash Üçlü",
-    description: "FullBite Smash + patates + içecek.",
+    description:
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme. Patates + içecek.",
     price: 554,
     category: "combo",
-    image: "/food/box.jpg",
+    image: "/food/combo.jpg",
     tags: ["3'lü"],
   },
   {
     id: "cheese-menu",
     name: "Cheese Üçlü",
-    description: "Cheese Burger + patates + içecek.",
+    description:
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme. Patates + içecek.",
     price: 449,
     category: "combo",
-    image: "/food/box.jpg",
+    image: "/food/combo.jpg",
     tags: ["3'lü"],
   },
   {
     id: "chicken-menu",
     name: "Tavuk Üçlü",
-    description: "Tavuk Burger + patates + içecek.",
+    description: "Tavuk Burger + patates + kola.",
     price: 494,
     category: "combo",
-    image: "/food/box.jpg",
+    image: "/food/combo.jpg",
     tags: ["3'lü"],
   },
   {
     id: "double-menu",
     name: "Double Üçlü",
-    description: "Double Burger + patates + içecek.",
+    description:
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme. Patates + içecek.",
     price: 524,
     category: "combo",
-    image: "/food/box.jpg",
+    image: "/food/combo.jpg",
     tags: ["3'lü"],
   },
   {
@@ -64,14 +67,14 @@ export const MENU: MenuItem[] = [
       "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme.",
     price: 419,
     category: "burger",
-    image: "/food/box.jpg",
+    image: "/food/dadas.jpg",
     tags: ["Dadaş"],
   },
   {
     id: "fullbite-smash",
     name: "FullBite Smash",
     description:
-      "İki kat smash dana, cheddar, karamelize soğan, turşu ve ev yapımı sos.",
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme.",
     price: 434,
     category: "burger",
     image: "/food/smash.jpg",
@@ -79,7 +82,8 @@ export const MENU: MenuItem[] = [
   {
     id: "classic-cheese",
     name: "Cheese Burger",
-    description: "Dana köfte, amerikan peyniri, marul, domates, turşu.",
+    description:
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme.",
     price: 329,
     category: "burger",
     image: "/food/cheese.jpg",
@@ -87,7 +91,8 @@ export const MENU: MenuItem[] = [
   {
     id: "double-stack",
     name: "Double Burger",
-    description: "İki dana köfte, çift cheddar, burger sosu, çıtır turşu.",
+    description:
+      "130 gr et, cheddar, domates, karamelize soğan, marul, özel sos, dana füme.",
     price: 404,
     category: "burger",
     image: "/food/double.jpg",
