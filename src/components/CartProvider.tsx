@@ -22,7 +22,6 @@ type CartContextValue = {
   setQuantity: (id: string, quantity: number) => void;
   clear: () => void;
   count: number;
-  pulse: number;
   items: Array<CartLine & { product: MenuItem }>;
   subtotal: number;
   deliveryFee: number;
@@ -35,7 +34,6 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
-  const [pulse, setPulse] = useState(0);
 
   useEffect(() => {
     try {
@@ -64,7 +62,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...current, { id, quantity }];
     });
-    setPulse((n) => n + 1);
   }, []);
 
   const remove = useCallback((id: string) => {
@@ -103,13 +100,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setQuantity,
       clear,
       count: items.reduce((sum, line) => sum + line.quantity, 0),
-      pulse,
       items,
       subtotal,
       deliveryFee,
       total: subtotal + deliveryFee,
     };
-  }, [add, clear, lines, pulse, remove, setQuantity]);
+  }, [add, clear, lines, remove, setQuantity]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -15,10 +15,10 @@ export function CartSummary() {
       </p>
       <Link
         href="/siparis"
-        className={`mt-6 block rounded-full py-3.5 text-center text-sm font-semibold uppercase tracking-[0.14em] transition duration-150 active:scale-[0.94] ${
+        className={`mt-6 block rounded-full py-3 text-center text-sm font-semibold ${
           count === 0
             ? "pointer-events-none bg-white/10 text-white/30"
-            : "bg-[#e8a317] text-[#140e0a] shadow-[0_10px_28px_rgba(232,163,23,0.38)] hover:bg-[#f3ba3a]"
+            : "bg-[#e8a317] text-[#140e0a]"
         }`}
       >
         Siparişe geç
