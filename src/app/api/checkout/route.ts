@@ -18,9 +18,9 @@ type Body = {
 
 export async function POST(request: Request) {
   try {
-    if (!isIyzicoConfigured()) {
+    if (!(await isIyzicoConfigured())) {
       return NextResponse.json(
-        { error: iyzicoConfigErrorMessage() },
+        { error: await iyzicoConfigErrorMessage() },
         { status: 500 },
       );
     }

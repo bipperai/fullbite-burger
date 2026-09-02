@@ -1,19 +1,14 @@
 import Iyzipay, { type IyzicoResult } from "iyzipay";
 import type { Order } from "./orders";
 import { toIyzicoPrice } from "./format";
-import {
-  getIyzicoCredentials,
-  getPublicBaseUrl,
-  iyzicoConfigErrorMessage,
-  isIyzicoConfigured,
-} from "./iyzico-config";
+import { getIyzicoCredentials, getPublicBaseUrl } from "./iyzico-config";
 
-export { isIyzicoConfigured, getIyzicoEnvStatus } from "./iyzico-config";
+export { getIyzicoEnvStatus, isIyzicoConfigured } from "./iyzico-config";
 
-function client() {
-  const creds = getIyzicoCredentials();
-  if (!creds.apiKey || !creds.secretKey) {
-    throw new Error(iyzicoConfigErrorMessage());
+async function client() {
+  const creds = await getIyzicoCredentials();
+  if (!creds?.apiKey || !creds?.secretKey) {
+    throw new Error("iyzico anahtarları tanımlı değil.");
   }
 
   return new Iyzipay({
@@ -42,7 +37,7 @@ function splitName(full: CustomerLike) {
 type CustomerLike = Order["customer"];
 
 export async function initializeCheckout(order: Order, ip: string) {
-  const iyzipay = client();
+  const iyzipay = await client();
   const { name, surname } = splitName(order.customer);
   const address = `${order.customer.address}, ${order.customer.district}`;
   const basketItems = [
@@ -115,7 +110,7 @@ export async function initializeCheckout(order: Order, ip: string) {
 }
 
 export async function retrieveCheckout(token: string, conversationId: string) {
-  const iyzipay = client();
+  const iyzipay = await client();
   return promisify<IyzicoResult>(
     iyzipay.checkoutForm.retrieve.bind(iyzipay.checkoutForm),
     {

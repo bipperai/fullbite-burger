@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminNav } from "./AdminNav";
-import { IyzicoStatusBanner } from "./IyzicoStatusBanner";
 import { formatTRY } from "@/lib/format";
 import {
   computeRevenueBreakdown,
@@ -98,7 +97,6 @@ export function AdminOrdersPanel({
   return (
     <div className="pb-10">
       <AdminNav adminEmail={adminEmail} onLogout={logout} />
-      <IyzicoStatusBanner />
 
       <div className="mx-auto mt-8 max-w-6xl px-4">
         <p className="text-sm text-[#f6ead7]/55">

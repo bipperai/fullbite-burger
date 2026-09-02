@@ -1,114 +1,75 @@
 import "server-only";
 
-function trim(value: string | undefined) {
-  return value?.trim() || "";
-}
-
-/** Getter'lar build zamanında inline edilmez — Vercel runtime'da okunur. */
-export const serverSecrets = {
-  get iyziApiKey() {
-    return (
-      trim(process.env.IYZI_API_KEY) ||
-      trim(process.env.IYZICO_API_KEY) ||
-      trim(process.env.IYZIPAY_API_KEY)
-    );
-  },
-  get iyziSecretKey() {
-    return (
-      trim(process.env.IYZI_SECRET_KEY) ||
-      trim(process.env.IYZICO_SECRET_KEY) ||
-      trim(process.env.IYZIPAY_SECRET_KEY)
-    );
-  },
-  get iyziBaseUrl() {
-    return (
-      trim(process.env.IYZI_BASE_URL) ||
-      trim(process.env.IYZICO_BASE_URL) ||
-      "https://sandbox-api.iyzipay.com"
-    );
-  },
-  get publicBaseUrl() {
-    const explicit = trim(process.env.NEXT_PUBLIC_BASE_URL);
-    if (explicit) return explicit.replace(/\/$/, "");
-    const vercel = trim(process.env.VERCEL_URL);
-    if (vercel) return `https://${vercel}`;
-    return "http://localhost:3000";
-  },
-};
-
-export function getIyzicoCredentials() {
-  const apiKey = serverSecrets.iyziApiKey;
-  const secretKey = serverSecrets.iyziSecretKey;
-
-  return {
-    apiKey: apiKey || null,
-    secretKey: secretKey || null,
-    apiKeyName: apiKey
-      ? process.env.IYZI_API_KEY?.trim()
-        ? "IYZI_API_KEY"
-        : process.env.IYZICO_API_KEY?.trim()
-          ? "IYZICO_API_KEY"
-          : "IYZIPAY_API_KEY"
-      : null,
-    secretKeyName: secretKey
-      ? process.env.IYZI_SECRET_KEY?.trim()
-        ? "IYZI_SECRET_KEY"
-        : process.env.IYZICO_SECRET_KEY?.trim()
-          ? "IYZICO_SECRET_KEY"
-          : "IYZIPAY_SECRET_KEY"
-      : null,
-    baseUrlName: process.env.IYZI_BASE_URL?.trim()
-      ? "IYZI_BASE_URL"
-      : process.env.IYZICO_BASE_URL?.trim()
-        ? "IYZICO_BASE_URL"
-        : null,
-    baseUrl: serverSecrets.iyziBaseUrl,
-  };
-}
-
-export function isIyzicoConfigured() {
-  return Boolean(serverSecrets.iyziApiKey && serverSecrets.iyziSecretKey);
-}
-
-export function getPublicBaseUrl() {
-  return serverSecrets.publicBaseUrl;
-}
+import {
+  getIyzicoCredentialSources,
+  loadStoredIyzicoCredentials,
+  type StoredIyzicoCredentials,
+} from "./iyzico-credentials-store";
 
 export type IyzicoEnvStatus = {
   configured: boolean;
+  source: "env" | "stored" | null;
   apiKeyName: string | null;
   secretKeyName: string | null;
   baseUrlName: string | null;
   baseUrl: string;
   callbackUrl: string;
   apiKeyPreview: string | null;
+  sources: ReturnType<typeof getIyzicoCredentialSources>;
 };
 
-export function getIyzicoEnvStatus(): IyzicoEnvStatus {
-  const creds = getIyzicoCredentials();
+export function getPublicBaseUrl() {
+  const explicit = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) return `https://${vercel}`;
+
+  return "http://localhost:3000";
+}
+
+export async function getIyzicoCredentials(): Promise<StoredIyzicoCredentials | null> {
+  return loadStoredIyzicoCredentials();
+}
+
+export async function isIyzicoConfigured() {
+  const creds = await loadStoredIyzicoCredentials();
+  return Boolean(creds?.apiKey && creds?.secretKey);
+}
+
+export async function getIyzicoEnvStatus(): Promise<IyzicoEnvStatus> {
+  const creds = await loadStoredIyzicoCredentials();
+  const sources = getIyzicoCredentialSources();
   const publicBase = getPublicBaseUrl();
 
+  const source: IyzicoEnvStatus["source"] = sources.hasEnvApiKey
+    ? "env"
+    : creds
+      ? "stored"
+      : null;
+
   return {
-    configured: isIyzicoConfigured(),
-    apiKeyName: creds.apiKeyName,
-    secretKeyName: creds.secretKeyName,
-    baseUrlName: creds.baseUrlName,
-    baseUrl: creds.baseUrl,
+    configured: Boolean(creds?.apiKey && creds?.secretKey),
+    source,
+    apiKeyName: sources.hasEnvApiKey ? "IYZI_API_KEY" : creds ? "stored" : null,
+    secretKeyName: sources.hasEnvSecret
+      ? "IYZI_SECRET_KEY"
+      : creds
+        ? "stored"
+        : null,
+    baseUrlName: process.env.IYZI_BASE_URL?.trim() ? "IYZI_BASE_URL" : null,
+    baseUrl: creds?.baseUrl || "https://api.iyzipay.com",
     callbackUrl: `${publicBase}/api/iyzico/callback`,
-    apiKeyPreview: creds.apiKey
+    apiKeyPreview: creds?.apiKey
       ? `${creds.apiKey.slice(0, 6)}…${creds.apiKey.slice(-4)}`
       : null,
+    sources,
   };
 }
 
-export function iyzicoConfigErrorMessage() {
-  const missing: string[] = [];
-  if (!serverSecrets.iyziApiKey) missing.push("IYZI_API_KEY");
-  if (!serverSecrets.iyziSecretKey) missing.push("IYZI_SECRET_KEY");
+export async function iyzicoConfigErrorMessage() {
+  const status = await getIyzicoEnvStatus();
+  if (status.configured) return "";
 
-  if (missing.length === 0) {
-    return "iyzico yapılandırması okunamadı.";
-  }
-
-  return `iyzico anahtarları eksik (${missing.join(", ")}). Vercel Production ortam değişkenlerini kontrol edin.`;
+  return "iyzico ödeme ayarları eksik. Vercel'de IYZI_API_KEY ve IYZI_SECRET_KEY değerlerini doldurun veya /yonetim/odeme sayfasından kaydedin.";
 }

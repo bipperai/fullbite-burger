@@ -8,5 +8,5 @@ export async function GET() {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
   }
 
-  return NextResponse.json(getIyzicoEnvStatus());
+  return NextResponse.json(await getIyzicoEnvStatus());
 }

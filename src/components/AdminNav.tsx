@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/yonetim", label: "Siparişler" },
   { href: "/yonetim/menu", label: "Menü & Fiyat" },
+  { href: "/yonetim/odeme", label: "Ödeme" },
 ];
 
 export function AdminNav({
