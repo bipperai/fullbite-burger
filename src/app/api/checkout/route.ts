@@ -13,21 +13,17 @@ export const dynamic = "force-dynamic";
 type Body = {
   customer: Customer;
   items: OrderItem[];
-  paymentMethod?: "iyzico" | "cod";
 };
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Body;
-    const paymentMethod: "iyzico" | "cod" =
-      body.paymentMethod === "cod" ? "cod" : "iyzico";
 
-    if (paymentMethod === "iyzico" && !(await isIyzicoConfigured())) {
+    if (!(await isIyzicoConfigured())) {
       return NextResponse.json(
         {
           error:
-            "Kart ödemesi şu an kapalı. Kapıda ödeme ile sipariş verebilirsiniz.",
-          codAvailable: true,
+            "Ödeme sistemi yapılandırılmamış. Lütfen daha sonra tekrar deneyin.",
         },
         { status: 503 },
       );
@@ -65,7 +61,7 @@ export async function POST(request: Request) {
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       status: "pending" as const,
-      paymentMethod,
+      paymentMethod: "iyzico" as const,
       customer: {
         name: body.customer.name,
         surname: body.customer.surname || body.customer.name,
@@ -85,11 +81,6 @@ export async function POST(request: Request) {
       total,
     };
 
-    if (paymentMethod === "cod") {
-      await saveOrder(order);
-      return NextResponse.json({ orderId: order.id, paymentMethod: "cod" });
-    }
-
     const forwarded = request.headers.get("x-forwarded-for");
     const ip = forwarded?.split(",")[0]?.trim() || "85.34.78.112";
     const result = await initializeCheckout(order, ip);
@@ -108,7 +99,7 @@ export async function POST(request: Request) {
       iyzicoToken: result.token,
     });
 
-    return NextResponse.json({ orderId: order.id, paymentMethod: "iyzico" });
+    return NextResponse.json({ orderId: order.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sunucu hatası";
     return NextResponse.json({ error: message }, { status: 500 });
