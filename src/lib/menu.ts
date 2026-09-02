@@ -5,4 +5,4 @@ export {
   FREE_DELIVERY_OVER,
   MENU_SECTIONS,
 } from "./menu-types";
-export { getMenu, getMenuItem, updateMenuItem } from "./menu-store";
+export { getMenu, getMenuItem, updateMenuItem, createMenuItem, deleteMenuItem } from "./menu-store";
