@@ -37,11 +37,16 @@ export type Order = {
   paymentError?: string;
 };
 
-const filePath = path.join(process.cwd(), ".data", "orders.json");
+function getOrdersPath() {
+  if (process.env.VERCEL) {
+    return "/tmp/fullbite-orders.json";
+  }
+  return path.join(process.cwd(), ".data", "orders.json");
+}
 
 async function readAll(): Promise<Record<string, Order>> {
   try {
-    const raw = await readFile(filePath, "utf8");
+    const raw = await readFile(getOrdersPath(), "utf8");
     return JSON.parse(raw) as Record<string, Order>;
   } catch {
     return {};
@@ -49,7 +54,10 @@ async function readAll(): Promise<Record<string, Order>> {
 }
 
 async function writeAll(orders: Record<string, Order>) {
-  await mkdir(path.dirname(filePath), { recursive: true });
+  const filePath = getOrdersPath();
+  if (!process.env.VERCEL) {
+    await mkdir(path.dirname(filePath), { recursive: true });
+  }
   await writeFile(filePath, JSON.stringify(orders, null, 2), "utf8");
 }
 
