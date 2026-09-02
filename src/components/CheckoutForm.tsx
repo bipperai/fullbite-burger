@@ -2,16 +2,34 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useCart } from "./CartProvider";
 import { MenuImage } from "./MenuImage";
 import { formatTRY } from "@/lib/format";
+
+type PaymentMethod = "iyzico" | "cod";
 
 export function CheckoutForm() {
   const router = useRouter();
   const { items, setQuantity, remove, total, count } = useCart();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [iyzicoAvailable, setIyzicoAvailable] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
+
+  useEffect(() => {
+    fetch("/api/payment-options")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { iyzico?: boolean } | null) => {
+        const available = Boolean(data?.iyzico);
+        setIyzicoAvailable(available);
+        setPaymentMethod(available ? "iyzico" : "cod");
+      })
+      .catch(() => {
+        setIyzicoAvailable(false);
+        setPaymentMethod("cod");
+      });
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,6 +50,7 @@ export function CheckoutForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          paymentMethod,
           customer: {
             name,
             surname,
@@ -49,10 +68,15 @@ export function CheckoutForm() {
       });
       const data = (await response.json()) as {
         orderId?: string;
+        paymentMethod?: PaymentMethod;
         error?: string;
       };
       if (!response.ok || !data.orderId) {
-        throw new Error(data.error || "Ödeme başlatılamadı.");
+        throw new Error(data.error || "Sipariş oluşturulamadı.");
+      }
+      if (data.paymentMethod === "cod") {
+        router.push(`/siparis/basarili?order=${data.orderId}&method=cod`);
+        return;
       }
       router.push(`/odeme/${data.orderId}`);
     } catch (err) {
@@ -151,6 +175,30 @@ export function CheckoutForm() {
         />
       </div>
 
+      <div className="space-y-3 rounded-2xl border border-white/10 bg-[#1c1410] p-5">
+        <h2 className="font-[family-name:var(--font-display)] text-2xl">Ödeme</h2>
+        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-[#140e0a] px-4 py-3">
+          <input
+            type="radio"
+            name="payment"
+            checked={paymentMethod === "cod"}
+            onChange={() => setPaymentMethod("cod")}
+          />
+          <span className="text-sm text-[#f6ead7]">Kapıda ödeme (nakit/kart)</span>
+        </label>
+        {iyzicoAvailable ? (
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-[#140e0a] px-4 py-3">
+            <input
+              type="radio"
+              name="payment"
+              checked={paymentMethod === "iyzico"}
+              onChange={() => setPaymentMethod("iyzico")}
+            />
+            <span className="text-sm text-[#f6ead7]">Kart ile öde (iyzico)</span>
+          </label>
+        ) : null}
+      </div>
+
       {error ? <p className="text-sm text-[#ff8a75]">{error}</p> : null}
 
       <button
@@ -158,7 +206,11 @@ export function CheckoutForm() {
         disabled={loading}
         className="w-full rounded-full bg-[#e8a317] py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#140e0a] disabled:opacity-60"
       >
-        {loading ? "Hazırlanıyor..." : `Öde · ${formatTRY(total)}`}
+        {loading
+          ? "Hazırlanıyor..."
+          : paymentMethod === "cod"
+            ? `Sipariş ver · ${formatTRY(total)}`
+            : `Öde · ${formatTRY(total)}`}
       </button>
     </form>
   );

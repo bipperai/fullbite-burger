@@ -24,6 +24,7 @@ export type Order = {
   id: string;
   createdAt: string;
   status: "pending" | "paid" | "failed";
+  paymentMethod?: "iyzico" | "cod";
   customer: Customer;
   items: OrderItem[];
   subtotal: number;

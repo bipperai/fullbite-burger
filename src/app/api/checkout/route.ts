@@ -4,7 +4,6 @@ import {
   initializeCheckout,
   isIyzicoConfigured,
 } from "@/lib/iyzico";
-import { iyzicoConfigErrorMessage } from "@/lib/iyzico-config";
 import { saveOrder, type Customer, type OrderItem } from "@/lib/orders";
 import { deliveryFeeFor, getMenuItem } from "@/lib/menu";
 
@@ -14,18 +13,26 @@ export const dynamic = "force-dynamic";
 type Body = {
   customer: Customer;
   items: OrderItem[];
+  paymentMethod?: "iyzico" | "cod";
 };
 
 export async function POST(request: Request) {
   try {
-    if (!(await isIyzicoConfigured())) {
+    const body = (await request.json()) as Body;
+    const paymentMethod: "iyzico" | "cod" =
+      body.paymentMethod === "cod" ? "cod" : "iyzico";
+
+    if (paymentMethod === "iyzico" && !(await isIyzicoConfigured())) {
       return NextResponse.json(
-        { error: await iyzicoConfigErrorMessage() },
-        { status: 500 },
+        {
+          error:
+            "Kart ödemesi şu an kapalı. Kapıda ödeme ile sipariş verebilirsiniz.",
+          codAvailable: true,
+        },
+        { status: 503 },
       );
     }
 
-    const body = (await request.json()) as Body;
     if (!body.customer?.name || !body.customer?.phone || !body.customer?.address || !body.items?.length) {
       return NextResponse.json({ error: "Eksik sipariş bilgisi." }, { status: 400 });
     }
@@ -58,6 +65,7 @@ export async function POST(request: Request) {
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       status: "pending" as const,
+      paymentMethod,
       customer: {
         name: body.customer.name,
         surname: body.customer.surname || body.customer.name,
@@ -77,6 +85,11 @@ export async function POST(request: Request) {
       total,
     };
 
+    if (paymentMethod === "cod") {
+      await saveOrder(order);
+      return NextResponse.json({ orderId: order.id, paymentMethod: "cod" });
+    }
+
     const forwarded = request.headers.get("x-forwarded-for");
     const ip = forwarded?.split(",")[0]?.trim() || "85.34.78.112";
     const result = await initializeCheckout(order, ip);
@@ -95,7 +108,7 @@ export async function POST(request: Request) {
       iyzicoToken: result.token,
     });
 
-    return NextResponse.json({ orderId: order.id });
+    return NextResponse.json({ orderId: order.id, paymentMethod: "iyzico" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sunucu hatası";
     return NextResponse.json({ error: message }, { status: 500 });
