@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { retrieveCheckout } from "@/lib/iyzico";
+import { getPublicBaseUrl } from "@/lib/iyzico-config";
 import { getOrder, updateOrder } from "@/lib/orders";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const form = await request.formData();
   const token = String(form.get("token") || "");
   const conversationId = String(form.get("conversationId") || "");
-  const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const base = getPublicBaseUrl();
 
   if (!token) {
     return NextResponse.redirect(`${base}/siparis/hata?reason=token`);

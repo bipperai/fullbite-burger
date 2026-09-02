@@ -8,6 +8,9 @@ import { iyzicoConfigErrorMessage } from "@/lib/iyzico-config";
 import { saveOrder, type Customer, type OrderItem } from "@/lib/orders";
 import { deliveryFeeFor, getMenuItem } from "@/lib/menu";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type Body = {
   customer: Customer;
   items: OrderItem[];
