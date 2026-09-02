@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Outfit } from "next/font/google";
 import { AppProviders } from "@/components/SiteShell";
+import { getMenu } from "@/lib/menu";
 import "./globals.css";
 
 const display = Fraunces({
@@ -22,14 +23,16 @@ export const metadata: Metadata = {
     "FullBite Burger — Erzurum’da 1986’dan beri besicilik, 2026’da Ankara Bahçelievler’de ilk şube.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const initialMenu = await getMenu();
+
   return (
     <html
       lang="tr"
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders initialMenu={initialMenu}>{children}</AppProviders>
       </body>
     </html>
   );

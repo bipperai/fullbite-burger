@@ -8,7 +8,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { deliveryFeeFor, getMenuItem, type MenuItem } from "@/lib/menu";
+import { useMenu } from "./MenuProvider";
+import { deliveryFeeFor, type MenuItem } from "@/lib/menu-types";
 
 export type CartLine = {
   id: string;
@@ -32,6 +33,7 @@ const STORAGE_KEY = "fullbite-cart";
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { getMenuItem } = useMenu();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -105,7 +107,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       deliveryFee,
       total: subtotal + deliveryFee,
     };
-  }, [add, clear, lines, remove, setQuantity]);
+  }, [add, clear, getMenuItem, lines, remove, setQuantity]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

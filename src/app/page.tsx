@@ -1,7 +1,9 @@
 import { ProductCard } from "@/components/ProductCard";
-import { MENU, MENU_SECTIONS } from "@/lib/menu";
+import { getMenu, MENU_SECTIONS } from "@/lib/menu";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const menu = await getMenu();
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="font-[family-name:var(--font-display)] text-5xl italic text-[#f6ead7] md:text-6xl">
@@ -12,7 +14,7 @@ export default function HomePage() {
       </p>
 
       {MENU_SECTIONS.map((section) => {
-        const items = MENU.filter((item) => item.category === section.id);
+        const items = menu.filter((item) => item.category === section.id);
         return (
           <section key={section.id} className="mt-12">
             <h2 className="font-[family-name:var(--font-display)] text-3xl italic text-[#e8a317]">

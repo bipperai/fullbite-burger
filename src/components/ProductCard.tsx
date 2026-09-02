@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCart } from "./CartProvider";
 import { formatTRY } from "@/lib/format";
-import type { MenuItem } from "@/lib/menu";
+import type { MenuItem } from "@/lib/menu-types";
 
 export function ProductCard({ item }: { item: MenuItem }) {
   const { add } = useCart();

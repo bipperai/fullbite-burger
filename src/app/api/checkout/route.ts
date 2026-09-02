@@ -26,9 +26,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Eksik sipariş bilgisi." }, { status: 400 });
     }
 
-    const items = body.items
-      .map((line) => {
-        const product = getMenuItem(line.id);
+    const resolved = await Promise.all(
+      body.items.map(async (line) => {
+        const product = await getMenuItem(line.id);
         if (!product) return null;
         return {
           id: product.id,
@@ -36,8 +36,9 @@ export async function POST(request: Request) {
           price: product.price,
           quantity: Math.max(1, Number(line.quantity) || 1),
         };
-      })
-      .filter((line): line is OrderItem => Boolean(line));
+      }),
+    );
+    const items = resolved.filter((line): line is OrderItem => Boolean(line));
 
     if (!items.length) {
       return NextResponse.json({ error: "Sepet geçersiz." }, { status: 400 });

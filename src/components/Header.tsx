@@ -10,12 +10,18 @@ const LINKS = [
   { href: "/", label: "Menü" },
   { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/siparis", label: "Sipariş" },
+  { href: "/yonetim", label: "Yönetim" },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+
+  function isActive(href: string) {
+    if (href === "/yonetim") return pathname.startsWith("/yonetim");
+    return pathname === href;
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#140e0a]/90 backdrop-blur-xl">
@@ -28,7 +34,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={`text-[0.95rem] font-medium tracking-wide transition ${
-                pathname === link.href
+                isActive(link.href)
                   ? "text-[#e8a317]"
                   : "text-[#f6ead7]/75 hover:text-[#f6ead7]"
               }`}

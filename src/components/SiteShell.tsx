@@ -1,9 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import type { MenuItem } from "@/lib/menu-types";
 import { CartProvider } from "./CartProvider";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
+import { MenuProvider } from "./MenuProvider";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,10 +24,18 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({
+  children,
+  initialMenu,
+}: {
+  children: React.ReactNode;
+  initialMenu?: MenuItem[];
+}) {
   return (
-    <CartProvider>
-      <SiteShell>{children}</SiteShell>
-    </CartProvider>
+    <MenuProvider initialMenu={initialMenu}>
+      <CartProvider>
+        <SiteShell>{children}</SiteShell>
+      </CartProvider>
+    </MenuProvider>
   );
 }
