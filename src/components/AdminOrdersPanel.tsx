@@ -34,12 +34,14 @@ type Props = {
   orders: Order[];
   adminEmail: string;
   deductionConfig: DeductionConfig;
+  storageWarning?: string | null;
 };
 
 export function AdminOrdersPanel({
   orders,
   adminEmail,
   deductionConfig,
+  storageWarning,
 }: Props) {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -97,6 +99,14 @@ export function AdminOrdersPanel({
   return (
     <div className="pb-10">
       <AdminNav adminEmail={adminEmail} onLogout={logout} />
+
+      {storageWarning ? (
+        <div className="mx-auto mt-6 max-w-6xl px-4">
+          <p className="rounded-2xl border border-[#c23c22]/40 bg-[#c23c22]/10 px-4 py-3 text-sm text-[#ff8a75]">
+            {storageWarning}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mx-auto mt-8 max-w-6xl px-4">
         <p className="text-sm text-[#f6ead7]/55">
