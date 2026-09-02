@@ -1,6 +1,10 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
-import { initializeCheckout, isIyzicoConfigured } from "@/lib/iyzico";
+import {
+  initializeCheckout,
+  isIyzicoConfigured,
+} from "@/lib/iyzico";
+import { iyzicoConfigErrorMessage } from "@/lib/iyzico-config";
 import { saveOrder, type Customer, type OrderItem } from "@/lib/orders";
 import { deliveryFeeFor, getMenuItem } from "@/lib/menu";
 
@@ -13,10 +17,7 @@ export async function POST(request: Request) {
   try {
     if (!isIyzicoConfigured()) {
       return NextResponse.json(
-        {
-          error:
-            "iyzico anahtarları eksik. .env.local içine IYZI_API_KEY ve IYZI_SECRET_KEY ekleyin.",
-        },
+        { error: iyzicoConfigErrorMessage() },
         { status: 500 },
       );
     }

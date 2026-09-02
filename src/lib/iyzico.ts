@@ -1,24 +1,25 @@
 import Iyzipay, { type IyzicoResult } from "iyzipay";
 import type { Order } from "./orders";
 import { toIyzicoPrice } from "./format";
+import {
+  getIyzicoCredentials,
+  getPublicBaseUrl,
+  iyzicoConfigErrorMessage,
+  isIyzicoConfigured,
+} from "./iyzico-config";
 
-function requireEnv(name: string) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} tanımlı değil. .env.local dosyasını kontrol edin.`);
-  }
-  return value;
-}
-
-export function isIyzicoConfigured() {
-  return Boolean(process.env.IYZI_API_KEY && process.env.IYZI_SECRET_KEY);
-}
+export { isIyzicoConfigured, getIyzicoEnvStatus } from "./iyzico-config";
 
 function client() {
+  const creds = getIyzicoCredentials();
+  if (!creds.apiKey || !creds.secretKey) {
+    throw new Error(iyzicoConfigErrorMessage());
+  }
+
   return new Iyzipay({
-    apiKey: requireEnv("IYZI_API_KEY"),
-    secretKey: requireEnv("IYZI_SECRET_KEY"),
-    uri: process.env.IYZI_BASE_URL || "https://sandbox-api.iyzipay.com",
+    apiKey: creds.apiKey,
+    secretKey: creds.secretKey,
+    uri: creds.baseUrl,
   });
 }
 
@@ -73,7 +74,7 @@ export async function initializeCheckout(order: Order, ip: string) {
     currency: Iyzipay.CURRENCY.TRY,
     basketId: order.id,
     paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
-    callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/iyzico/callback`,
+    callbackUrl: `${getPublicBaseUrl()}/api/iyzico/callback`,
     enabledInstallments: [1, 2, 3, 6],
     buyer: {
       id: order.id.slice(0, 11),
