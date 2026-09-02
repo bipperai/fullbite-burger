@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export function AdminLoginForm() {
+export function AdminLoginForm({ disabled = false }: { disabled?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/yonetim";
@@ -68,10 +68,10 @@ export function AdminLoginForm() {
       {error ? <p className="text-sm text-[#ff8a75]">{error}</p> : null}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || disabled}
         className="w-full rounded-full bg-[#e8a317] py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#140e0a] disabled:opacity-60"
       >
-        {loading ? "Giriş yapılıyor..." : "Giriş yap"}
+        {disabled ? "Önce Vercel ayarı gerekli" : loading ? "Giriş yapılıyor..." : "Giriş yap"}
       </button>
     </form>
   );
