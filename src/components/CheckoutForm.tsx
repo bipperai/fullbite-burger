@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useCart } from "./CartProvider";
+import { MenuImage } from "./MenuImage";
 import { formatTRY } from "@/lib/format";
 
 export function CheckoutForm() {
@@ -85,7 +85,7 @@ export function CheckoutForm() {
             className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1c1410] p-3"
           >
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
-              <Image
+              <MenuImage
                 src={line.product.image}
                 alt={line.product.name}
                 fill

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { MenuImage } from "./MenuImage";
 import { useCart } from "./CartProvider";
 import { formatTRY } from "@/lib/format";
 import type { MenuItem } from "@/lib/menu-types";
@@ -11,7 +11,7 @@ export function ProductCard({ item }: { item: MenuItem }) {
   return (
     <article className="group overflow-hidden rounded-3xl border border-white/10 bg-[#1c1410] shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <Image
+        <MenuImage
           src={item.image}
           alt={item.name}
           fill

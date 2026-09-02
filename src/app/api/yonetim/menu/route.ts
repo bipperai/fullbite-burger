@@ -17,6 +17,7 @@ type Body = {
   name?: string;
   description?: string;
   price?: number;
+  image?: string;
 };
 
 export async function PATCH(request: Request) {
@@ -35,6 +36,7 @@ export async function PATCH(request: Request) {
     name?: string;
     description?: string;
     price?: number;
+    image?: string;
   } = {};
 
   if (body.name !== undefined) {
@@ -55,6 +57,14 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Geçersiz fiyat." }, { status: 400 });
     }
     patch.price = price;
+  }
+
+  if (body.image !== undefined) {
+    const image = String(body.image).trim();
+    if (!image.startsWith("/")) {
+      return NextResponse.json({ error: "Geçersiz resim yolu." }, { status: 400 });
+    }
+    patch.image = image;
   }
 
   if (!Object.keys(patch).length) {

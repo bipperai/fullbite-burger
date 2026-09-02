@@ -30,7 +30,7 @@ export async function getMenuItem(id: string) {
 
 export async function updateMenuItem(
   id: string,
-  patch: Partial<Pick<MenuItem, "name" | "description" | "price">>,
+  patch: Partial<Pick<MenuItem, "name" | "description" | "price" | "image">>,
 ) {
   const menu = await getMenu();
   const index = menu.findIndex((item) => item.id === id);
