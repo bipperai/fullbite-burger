@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Outfit } from "next/font/google";
-import { CartProvider } from "@/components/CartProvider";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import { AppProviders } from "@/components/SiteShell";
 import "./globals.css";
 
 const display = Fraunces({
@@ -31,11 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </CartProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

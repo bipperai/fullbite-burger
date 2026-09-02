@@ -72,3 +72,10 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
   await writeAll(orders);
   return next;
 }
+
+export async function listOrders() {
+  const orders = await readAll();
+  return Object.values(orders).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
