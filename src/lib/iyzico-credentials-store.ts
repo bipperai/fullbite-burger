@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 
@@ -12,6 +13,23 @@ const DATA_PATH = path.join(process.cwd(), ".data", "iyzico-credentials.json");
 
 let memoryCache: StoredIyzicoCredentials | null = null;
 
+function trim(value: string | undefined) {
+  return value?.trim() || "";
+}
+
+/** Next.js build bazen process.env'i boş inline eder; shell env hâlâ dolu olabilir. */
+function readShellEnv(name: string) {
+  try {
+    return trim(execSync(`printenv ${name}`, { encoding: "utf8" }));
+  } catch {
+    return "";
+  }
+}
+
+function readEnvValue(name: string) {
+  return trim(process.env[name]) || readShellEnv(name);
+}
+
 function parseCredentials(raw: string): StoredIyzicoCredentials | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
@@ -23,13 +41,13 @@ function parseCredentials(raw: string): StoredIyzicoCredentials | null {
         secretKey?: string;
         baseUrl?: string;
       };
-      const apiKey = json.apiKey?.trim();
-      const secretKey = json.secretKey?.trim();
+      const apiKey = trim(json.apiKey);
+      const secretKey = trim(json.secretKey);
       if (!apiKey || !secretKey) return null;
       return {
         apiKey,
         secretKey,
-        baseUrl: json.baseUrl?.trim() || "https://api.iyzipay.com",
+        baseUrl: trim(json.baseUrl) || "https://api.iyzipay.com",
       };
     } catch {
       return null;
@@ -47,30 +65,27 @@ function parseCredentials(raw: string): StoredIyzicoCredentials | null {
 
 function fromEnv(): StoredIyzicoCredentials | null {
   const apiKey =
-    process.env.IYZI_API_KEY?.trim() ||
-    process.env.IYZICO_API_KEY?.trim() ||
-    process.env.IYZIPAY_API_KEY?.trim();
+    readEnvValue("IYZI_API_KEY") ||
+    readEnvValue("IYZICO_API_KEY") ||
+    readEnvValue("IYZIPAY_API_KEY");
   const secretKey =
-    process.env.IYZI_SECRET_KEY?.trim() ||
-    process.env.IYZICO_SECRET_KEY?.trim() ||
-    process.env.IYZIPAY_SECRET_KEY?.trim();
+    readEnvValue("IYZI_SECRET_KEY") ||
+    readEnvValue("IYZICO_SECRET_KEY") ||
+    readEnvValue("IYZIPAY_SECRET_KEY");
 
   if (apiKey && secretKey) {
     return {
       apiKey,
       secretKey,
       baseUrl:
-        process.env.IYZI_BASE_URL?.trim() ||
-        process.env.IYZICO_BASE_URL?.trim() ||
+        readEnvValue("IYZI_BASE_URL") ||
+        readEnvValue("IYZICO_BASE_URL") ||
         "https://api.iyzipay.com",
     };
   }
 
-  const combined = process.env.IYZI_CREDENTIALS?.trim();
+  const combined = readEnvValue("IYZI_CREDENTIALS") || readEnvValue("IYZI_CONFIG");
   if (combined) return parseCredentials(combined);
-
-  const configJson = process.env.IYZI_CONFIG?.trim();
-  if (configJson) return parseCredentials(configJson);
 
   return null;
 }
@@ -82,6 +97,24 @@ async function readFileIfExists(filePath: string) {
   } catch {
     return null;
   }
+}
+
+export function probeIyzicoEnv() {
+  const names = [
+    "IYZI_API_KEY",
+    "IYZI_SECRET_KEY",
+    "IYZI_BASE_URL",
+    "IYZI_CREDENTIALS",
+    "IYZICO_API_KEY",
+    "ADMIN_USERS",
+    "VERCEL",
+  ];
+
+  return names.map((name) => ({
+    name,
+    processEnv: Boolean(process.env[name]?.trim()),
+    shellEnv: Boolean(readShellEnv(name)),
+  }));
 }
 
 export async function loadStoredIyzicoCredentials(): Promise<StoredIyzicoCredentials | null> {
@@ -105,12 +138,6 @@ export async function loadStoredIyzicoCredentials(): Promise<StoredIyzicoCredent
   return null;
 }
 
-export function loadIyzicoCredentialsSync(): StoredIyzicoCredentials | null {
-  const fromEnvironment = fromEnv();
-  if (fromEnvironment) return fromEnvironment;
-  return memoryCache;
-}
-
 export async function saveIyzicoCredentials(credentials: StoredIyzicoCredentials) {
   memoryCache = credentials;
   const payload = JSON.stringify(credentials, null, 2);
@@ -121,24 +148,24 @@ export async function saveIyzicoCredentials(credentials: StoredIyzicoCredentials
   try {
     await writeFile(TMP_PATH, payload, "utf8");
   } catch {
-    // /tmp may be unavailable locally — ignore
+    // ignore
   }
 }
 
 export function getIyzicoCredentialSources() {
   return {
     hasEnvApiKey: Boolean(
-      process.env.IYZI_API_KEY?.trim() ||
-        process.env.IYZICO_API_KEY?.trim() ||
-        process.env.IYZIPAY_API_KEY?.trim(),
+      readEnvValue("IYZI_API_KEY") ||
+        readEnvValue("IYZICO_API_KEY") ||
+        readEnvValue("IYZIPAY_API_KEY"),
     ),
     hasEnvSecret: Boolean(
-      process.env.IYZI_SECRET_KEY?.trim() ||
-        process.env.IYZICO_SECRET_KEY?.trim() ||
-        process.env.IYZIPAY_SECRET_KEY?.trim(),
+      readEnvValue("IYZI_SECRET_KEY") ||
+        readEnvValue("IYZICO_SECRET_KEY") ||
+        readEnvValue("IYZIPAY_SECRET_KEY"),
     ),
     hasCombinedEnv: Boolean(
-      process.env.IYZI_CREDENTIALS?.trim() || process.env.IYZI_CONFIG?.trim(),
+      readEnvValue("IYZI_CREDENTIALS") || readEnvValue("IYZI_CONFIG"),
     ),
     hasMemoryCache: Boolean(memoryCache),
   };

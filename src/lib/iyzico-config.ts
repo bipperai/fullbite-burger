@@ -1,5 +1,6 @@
 import "server-only";
 
+import { execSync } from "node:child_process";
 import {
   getIyzicoCredentialSources,
   loadStoredIyzicoCredentials,
@@ -19,13 +20,23 @@ export type IyzicoEnvStatus = {
 };
 
 export function getPublicBaseUrl() {
-  const explicit = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const explicit =
+    process.env.NEXT_PUBLIC_BASE_URL?.trim() ||
+    (() => {
+      try {
+        return execSync("printenv NEXT_PUBLIC_BASE_URL", {
+          encoding: "utf8",
+        }).trim();
+      } catch {
+        return "";
+      }
+    })();
   if (explicit) return explicit.replace(/\/$/, "");
 
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) return `https://${vercel}`;
 
-  return "http://localhost:3000";
+  return "https://www.fullbiteburger.com";
 }
 
 export async function getIyzicoCredentials(): Promise<StoredIyzicoCredentials | null> {
